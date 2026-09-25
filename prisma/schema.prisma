@@ -1,0 +1,422 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum FormatCategory {
+  DOCUMENT
+  IMAGE
+  VIDEO
+  AUDIO
+  SPREADSHEET
+  PRESENTATION
+  EBOOK
+  ARCHIVE
+  VECTOR
+  CAD
+  FONT
+  OTHER
+}
+
+enum FormatStatus {
+  ACTIVE
+  BETA
+  COMING_SOON
+  DISABLED
+}
+
+enum ConversionStatus {
+  ACTIVE
+  BETA
+  COMING_SOON
+  DISABLED
+}
+
+enum SeoPageType {
+  CONVERSION
+  FORMAT
+  CATEGORY
+  TOOL
+  GUIDE
+  FAQ
+  COMPARISON
+}
+
+enum PageStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+enum OpportunityType {
+  LOW_CTR
+  RANKING_11_20
+  HIGH_IMPRESSIONS
+  MISSING_QUERY
+  CONTENT_GAP
+  MISSING_FAQ
+  MISSING_INTERNAL_LINKS
+  WEAK_TITLE
+  WEAK_META
+  THIN_CONTENT
+  OUTDATED_CONTENT
+  INDEXING_PROBLEM
+  CANONICAL_PROBLEM
+  SCHEMA_PROBLEM
+  LOW_AEO_SCORE
+  LOW_GEO_SCORE
+  ORPHAN_PAGE
+}
+
+enum OpportunityPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum OpportunityStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  DISMISSED
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model Format {
+  id                 String         @id @default(cuid())
+  slug               String         @unique
+  name               String
+  extension          String
+  mimeType           String?
+  category           FormatCategory
+
+  description        String?
+  shortDescription   String?
+
+  isInputSupported   Boolean        @default(false)
+  isOutputSupported  Boolean        @default(false)
+  isBrowserSupported Boolean        @default(false)
+  isServerSupported  Boolean        @default(false)
+
+  engine             String?
+  status             FormatStatus   @default(ACTIVE)
+
+  seoEnabled         Boolean        @default(true)
+  aeoEnabled         Boolean        @default(true)
+  geoEnabled         Boolean        @default(true)
+
+  metadata           Json?
+  aliases            Json?
+
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  sourceConversions  Conversion[]   @relation("SourceFormat")
+  targetConversions  Conversion[]   @relation("TargetFormat")
+
+  formatPage         SeoPage?
+
+  @@index([slug])
+  @@index([category])
+  @@index([status])
+}
+
+model Conversion {
+  id               String           @id @default(cuid())
+
+  sourceFormatId   String
+  targetFormatId   String
+
+  sourceFormat     Format           @relation("SourceFormat", fields: [sourceFormatId], references: [id])
+  targetFormat     Format           @relation("TargetFormat", fields: [targetFormatId], references: [id])
+
+  slug             String           @unique
+
+  status           ConversionStatus @default(ACTIVE)
+
+  engine           String?
+  browserSupport   Boolean          @default(false)
+  serverSupport    Boolean          @default(true)
+
+  optionsSchema    Json?
+  limitations      Json?
+
+  seoScore         Float?
+  demandScore      Float?
+  usefulnessScore  Float?
+  competitionScore Float?
+  uniquenessScore  Float?
+
+  indexable        Boolean          @default(false)
+
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  seoPage          SeoPage?
+
+  @@unique([sourceFormatId, targetFormatId])
+  @@index([slug])
+  @@index([sourceFormatId])
+  @@index([targetFormatId])
+  @@index([indexable])
+}
+
+model SeoPage {
+  id              String           @id @default(cuid())
+
+  conversionId    String?          @unique
+  formatId        String?          @unique
+
+  type            SeoPageType
+
+  slug            String           @unique
+  canonicalUrl    String
+
+  title           String?
+  metaDescription String?
+  h1              String?
+
+  intro           String?
+  content         Json?
+
+  faq             Json?
+  answerBlocks    Json?
+  howTo           Json?
+
+  schema          Json?
+
+  seoScore        Float?
+  contentScore    Float?
+  technicalScore  Float?
+  aeoScore        Float?
+  geoScore        Float?
+
+  indexable       Boolean          @default(false)
+  noIndex         Boolean          @default(false)
+
+  canonicalTarget String?
+
+  status          PageStatus       @default(DRAFT)
+
+  version         Int              @default(1)
+
+  lastGeneratedAt DateTime?
+  lastReviewedAt  DateTime?
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  conversion      Conversion?      @relation(fields: [conversionId], references: [id])
+  format          Format?          @relation(fields: [formatId], references: [id])
+
+  linksFrom       InternalLink[]   @relation("SourcePage")
+  linksTo         InternalLink[]   @relation("TargetPage")
+
+  queries         SearchQuery[]
+  opportunities   SeoOpportunity[]
+
+  @@index([slug])
+  @@index([indexable])
+  @@index([status])
+  @@index([seoScore])
+}
+
+model SearchQuery {
+  id          String   @id @default(cuid())
+
+  query       String
+  pageUrl     String?
+
+  country     String?
+  device      String?
+
+  clicks      Int      @default(0)
+  impressions Int      @default(0)
+
+  ctr         Float?
+  position    Float?
+
+  date        DateTime
+
+  pageId      String?
+  page        SeoPage? @relation(fields: [pageId], references: [id])
+
+  createdAt   DateTime @default(now())
+
+  @@index([query])
+  @@index([pageUrl])
+  @@index([date])
+}
+
+model SeoOpportunity {
+  id             String              @id @default(cuid())
+
+  pageId         String?
+  page           SeoPage?            @relation(fields: [pageId], references: [id])
+
+  type           OpportunityType
+
+  priority       OpportunityPriority
+
+  title          String
+  description    String
+
+  evidence       Json?
+  recommendation Json?
+
+  score          Float
+
+  status         OpportunityStatus   @default(OPEN)
+
+  detectedAt     DateTime            @default(now())
+  resolvedAt     DateTime?
+
+  @@index([status])
+  @@index([priority])
+  @@index([type])
+}
+
+model InternalLink {
+  id             String   @id @default(cuid())
+
+  sourcePageId   String
+  targetPageId   String
+
+  anchorText     String
+  context        String?
+
+  relevanceScore Float
+  priority       Float
+
+  generated      Boolean  @default(true)
+  active         Boolean  @default(true)
+
+  sourcePage     SeoPage  @relation("SourcePage", fields: [sourcePageId], references: [id])
+  targetPage     SeoPage  @relation("TargetPage", fields: [targetPageId], references: [id])
+
+  createdAt      DateTime @default(now())
+
+  @@unique([sourcePageId, targetPageId])
+  @@index([sourcePageId])
+  @@index([targetPageId])
+}
+
+model SearchConsoleProperty {
+  id           String    @id @default(cuid())
+
+  siteUrl      String    @unique
+
+  accessToken  String?
+  refreshToken String?
+
+  connected    Boolean   @default(false)
+
+  lastSyncAt   DateTime?
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model ContentVersion {
+  id          String   @id @default(cuid())
+
+  pageId      String
+
+  version     Int
+
+  title       String?
+  content     Json?
+
+  seoScore    Float?
+  aeoScore    Float?
+  geoScore    Float?
+
+  generatedBy String?
+  approvedBy  String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([pageId])
+}
+
+model AiJob {
+  id          String    @id @default(cuid())
+
+  type        String
+  status      JobStatus
+
+  entityId    String?
+
+  input       Json?
+  output      Json?
+  error       String?
+
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  createdAt   DateTime  @default(now())
+
+  @@index([status])
+}
+
+model SeoSettings {
+  id                 String   @id @default(cuid())
+
+  siteName           String
+  domain             String
+
+  defaultTitleSuffix String?
+  defaultDescription String?
+
+  indexThreshold     Float    @default(80)
+
+  autoGenerate       Boolean  @default(false)
+  autoPublish        Boolean  @default(false)
+
+  maxInternalLinks   Int      @default(8)
+
+  allowOaiSearchBot  Boolean  @default(true)
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model BlogPost {
+  id              String      @id @default(cuid())
+  slug            String      @unique
+  title           String
+  excerpt         String?
+  content         String
+  coverImage      String?
+  category        String      @default("Guides")
+  tags            Json?
+  author          String      @default("OmniTools Editorial")
+  readingTime     String?
+  status          PageStatus  @default(DRAFT)
+  seoTitle        String?
+  seoDescription  String?
+  canonicalUrl    String?
+  schema          Json?
+  views           Int         @default(0)
+  publishedAt     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([slug])
+  @@index([status])
+  @@index([category])
+  @@index([publishedAt])
+}
+

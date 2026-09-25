@@ -1,0 +1,97 @@
+"use client";
+
+import React from "react";
+import {
+  Layers,
+  Scissors,
+  Minimize2,
+  FileImage,
+  FilePlus,
+  RotateCw,
+  Grid,
+  Hash,
+  Stamp,
+  Info,
+  FileDown,
+  Scaling,
+  RefreshCw,
+  Crop,
+  Camera,
+  Eraser,
+  Percent,
+  Tag,
+  Calendar,
+  CalendarDays,
+  ArrowLeftRight,
+  Heart,
+  Coins,
+  TrendingUp,
+  Receipt,
+  DollarSign,
+  FileCheck,
+  Type,
+  QrCode,
+  Binary,
+  ShieldCheck,
+  KeyRound,
+  Wrench,
+  FileText,
+  Image,
+  Calculator,
+  Zap,
+  Globe,
+  Film,
+  Download,
+} from "lucide-react";
+
+interface ToolIconProps {
+  name: string;
+  className?: string;
+}
+
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Layers,
+  Scissors,
+  Minimize2,
+  FileImage,
+  FilePlus,
+  RotateCw,
+  Grid,
+  Hash,
+  Stamp,
+  Info,
+  FileDown,
+  Scaling,
+  RefreshCw,
+  Crop,
+  Camera,
+  Eraser,
+  Percent,
+  Tag,
+  Calendar,
+  CalendarDays,
+  ArrowLeftRight,
+  Heart,
+  Coins,
+  TrendingUp,
+  Receipt,
+  DollarSign,
+  FileCheck,
+  Type,
+  QrCode,
+  Binary,
+  ShieldCheck,
+  KeyRound,
+  FileText,
+  Image,
+  Calculator,
+  Zap,
+  Globe,
+  Film,
+  Download,
+};
+
+export function ToolIcon({ name, className = "w-5 h-5" }: ToolIconProps) {
+  const IconComponent = ICON_MAP[name] || Wrench;
+  return <IconComponent className={className} />;
+}

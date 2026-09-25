@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 220 20% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 12%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 16% 93%;
+    --secondary-foreground: 220 20% 12%;
+    --muted: 210 16% 93%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 20% 95%;
+    --accent-foreground: 220 20% 12%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 221 83% 53%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 224 25% 9%;
+    --foreground: 210 20% 98%;
+    --card: 224 25% 12%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 25% 12%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 220 20% 18%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 220 20% 18%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 220 20% 18%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased min-h-screen selection:bg-blue-500/20 selection:text-blue-600 dark:selection:bg-blue-500/30 dark:selection:text-blue-300;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
