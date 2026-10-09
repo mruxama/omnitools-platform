@@ -559,6 +559,50 @@ export const TOOLS_REGISTRY: ToolItem[] = [
     supportedFormats: ["JPG (.jpg, .jpeg)", "PNG (.png)", "WebP (.webp)"],
     status: "ready",
   },
+  {
+    id: "bulk-watermark",
+    name: "Bulk Image & Video Watermark Studio",
+    shortDescription: "Add custom logos, multi-line text, 3x3 grid positioning, and opacity in batch for images and videos.",
+    longDescription: "Professional studio for applying single and bulk watermarks to photos, product images, graphics, and videos. Supports transparent logos (PNG, WebP, SVG), custom multi-line text with drop shadow and outline, 9-point anchor alignment, rotation, audio preservation, and instant ZIP export with 100% in-browser privacy.",
+    category: "image",
+    categoryName: "Image Tools",
+    path: "/tools/bulk-watermark",
+    icon: "Stamp",
+    keywords: [
+      "bulk watermark",
+      "watermark images",
+      "video watermark",
+      "batch watermark",
+      "add logo to video",
+      "transparent watermark",
+      "copyright stamp",
+      "product watermark"
+    ],
+    badges: ["popular", "featured", "new"],
+    relatedToolIds: ["image-compressor", "image-resizer", "background-remover", "omniget"],
+    features: [
+      "Mixed image and video batch processing in one queue",
+      "Multi-layer support: combine multiple text and logo watermarks",
+      "Transparent logo overlays with preserved alpha channel",
+      "Interactive 3-panel workspace: drag, resize, guidelines, and zoom",
+      "3×3 anchor grid with percentage and pixel margin offsets",
+      "Video audio track preservation with interval timing and fade-in/out",
+      "Zero server uploads: 100% private in-browser processing",
+      "Individual downloads and single-click bulk ZIP archive export"
+    ],
+    howToSteps: [
+      { title: "Upload media", desc: "Drag and drop or select one or multiple images and videos into the library." },
+      { title: "Customize watermark", desc: "Type text or upload a transparent logo, then adjust position, size, opacity, and rotation." },
+      { title: "Batch process & download", desc: "Preview real-time changes and click 'Process All' to export or download a ZIP." }
+    ],
+    faqs: [
+      { question: "Are my uploaded photos and videos sent to your servers?", answer: "No. All watermark rendering and video frame processing runs locally inside your browser session using HTML5 Canvas and MediaRecorder. Your files never leave your device." },
+      { question: "Can I watermark videos and keep the audio intact?", answer: "Yes! Our video processing pipeline taps the Web Audio API to preserve and synchronize the original audio tracks in the exported video." },
+      { question: "Does this support transparent PNG and WebP logos?", answer: "Yes. Genuine transparent alpha channels are preserved without dark borders or halos." }
+    ],
+    supportedFormats: ["JPG (.jpg, .jpeg)", "PNG (.png)", "WebP (.webp)", "MP4 (.mp4)", "MOV (.mov)", "WebM (.webm)"],
+    status: "ready",
+  },
 
   // --- CALCULATORS & CONVERTERS ---
   {

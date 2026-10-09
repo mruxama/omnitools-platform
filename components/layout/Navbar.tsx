@@ -18,6 +18,7 @@ import {
   BookOpen,
   Globe,
   Film,
+  Stamp,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { SearchModal } from "../search/SearchModal";
@@ -45,6 +46,7 @@ export function Navbar() {
 
   const navLinks = [
     { name: "Converter", href: "/convert", icon: RefreshCw },
+    { name: "Watermark", href: "/tools/bulk-watermark", icon: Stamp },
     { name: "Video Downloader", href: "/video-downloader", icon: Film },
     { name: "Web-Check", href: "/web-check", icon: Globe },
     { name: "All Tools", href: "/tools", icon: Layers },
