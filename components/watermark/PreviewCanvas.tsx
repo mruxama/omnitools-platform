@@ -25,6 +25,8 @@ import {
   Sparkles,
   Volume2,
   VolumeX,
+  Download,
+  Loader2,
 } from "lucide-react";
 
 interface PreviewCanvasProps {
@@ -34,6 +36,8 @@ interface PreviewCanvasProps {
   videoTiming: VideoTimingConfig;
   onUpdateLayer: (id: string, updates: Partial<WatermarkLayer>) => void;
   onSelectLayer: (id: string) => void;
+  onDownloadCurrent?: () => void;
+  isDownloadingCurrent?: boolean;
 }
 
 export function PreviewCanvas({
@@ -43,6 +47,8 @@ export function PreviewCanvas({
   videoTiming,
   onUpdateLayer,
   onSelectLayer,
+  onDownloadCurrent,
+  isDownloadingCurrent,
 }: PreviewCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -359,6 +365,24 @@ export function PreviewCanvas({
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
+
+          {/* Download Current Media Button */}
+          {activeMedia && onDownloadCurrent && (
+            <button
+              type="button"
+              onClick={onDownloadCurrent}
+              disabled={isDownloadingCurrent}
+              className="ml-1 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 disabled:opacity-50 flex items-center gap-1.5 shadow-sm transition-all"
+              title="Download watermarked file"
+            >
+              {isDownloadingCurrent ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Download className="w-3.5 h-3.5" />
+              )}
+              <span>Download {activeMedia.type === "video" ? "Video" : "Image"}</span>
+            </button>
+          )}
         </div>
       </div>
 

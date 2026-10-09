@@ -427,6 +427,51 @@ export function BulkWatermarkStudio() {
   };
 
   const activeMedia = mediaItems.find((m) => m.id === activeMediaId) || null;
+  const [isDownloadingCurrent, setIsDownloadingCurrent] = useState(false);
+
+  const handleDownloadCurrent = async () => {
+    if (!activeMedia) return;
+    setIsDownloadingCurrent(true);
+
+    try {
+      if (activeMedia.type === "image") {
+        const res = await processImageWithWatermarks(
+          activeMedia.file,
+          layers,
+          exportOptions
+        );
+        const outputName = generateOutputFilename(activeMedia.name, res.blob.type);
+        const url = URL.createObjectURL(res.blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = outputName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+      } else if (activeMedia.type === "video") {
+        const res = await processVideoWithWatermarks(
+          activeMedia.file,
+          layers,
+          videoTiming,
+          exportOptions
+        );
+        const outputName = generateOutputFilename(activeMedia.name, res.mimeType);
+        const url = URL.createObjectURL(res.blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = outputName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+      }
+    } catch (err: any) {
+      alert(err?.message || "Failed to download watermarked file");
+    } finally {
+      setIsDownloadingCurrent(false);
+    }
+  };
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] bg-background">
@@ -455,6 +500,8 @@ export function BulkWatermarkStudio() {
             videoTiming={videoTiming}
             onUpdateLayer={handleUpdateLayer}
             onSelectLayer={setActiveLayerId}
+            onDownloadCurrent={handleDownloadCurrent}
+            isDownloadingCurrent={isDownloadingCurrent}
           />
         </div>
 
@@ -465,6 +512,11 @@ export function BulkWatermarkStudio() {
             activeLayerId={activeLayerId}
             videoTiming={videoTiming}
             exportOptions={exportOptions}
+            activeMediaType={activeMedia?.type}
+            mediaCount={mediaItems.length}
+            isDownloadingCurrent={isDownloadingCurrent}
+            onDownloadCurrent={handleDownloadCurrent}
+            onStartProcessing={handleStartProcessing}
             onUpdateLayer={handleUpdateLayer}
             onSelectLayer={setActiveLayerId}
             onAddLayer={handleAddLayer}
@@ -478,11 +530,16 @@ export function BulkWatermarkStudio() {
         </div>
       </div>
 
-      {/* Bottom Panel: Processing Queue */}
+      {/* Bottom Panel: Processing Queue & Quick Download Bar */}
       <ProcessingQueueSection
         jobs={jobs}
         isProcessing={isProcessing}
         exportOptions={exportOptions}
+        mediaCount={mediaItems.length}
+        activeMediaName={activeMedia?.name}
+        activeMediaType={activeMedia?.type}
+        isDownloadingCurrent={isDownloadingCurrent}
+        onDownloadCurrent={handleDownloadCurrent}
         onCancel={handleCancelProcessing}
         onRetryFailed={handleRetryFailed}
         onStartProcessing={handleStartProcessing}

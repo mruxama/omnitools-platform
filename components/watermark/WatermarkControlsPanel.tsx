@@ -27,6 +27,8 @@ import {
   Sparkles,
   Layers,
   FileCheck,
+  Archive,
+  Loader2,
 } from "lucide-react";
 
 interface WatermarkControlsPanelProps {
@@ -34,6 +36,11 @@ interface WatermarkControlsPanelProps {
   activeLayerId: string;
   videoTiming: VideoTimingConfig;
   exportOptions: ExportOptions;
+  activeMediaType?: "image" | "video";
+  mediaCount?: number;
+  isDownloadingCurrent?: boolean;
+  onDownloadCurrent?: () => void;
+  onStartProcessing?: () => void;
   onUpdateLayer: (id: string, updates: Partial<WatermarkLayer>) => void;
   onSelectLayer: (id: string) => void;
   onAddLayer: (type: "text" | "logo") => void;
@@ -50,6 +57,11 @@ export function WatermarkControlsPanel({
   activeLayerId,
   videoTiming,
   exportOptions,
+  activeMediaType,
+  mediaCount,
+  isDownloadingCurrent,
+  onDownloadCurrent,
+  onStartProcessing,
   onUpdateLayer,
   onSelectLayer,
   onAddLayer,
@@ -132,6 +144,52 @@ export function WatermarkControlsPanel({
       </div>
 
       <div className="p-4 space-y-4">
+        {/* PROMINENT DOWNLOAD ACTION CARD */}
+        {onDownloadCurrent && (
+          <div className="p-4 bg-primary/10 border-2 border-primary/30 rounded-2xl shadow-sm space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Download className="w-3.5 h-3.5 text-primary" /> Export Output
+              </span>
+              {activeMediaType && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary text-primary-foreground uppercase">
+                  {activeMediaType}
+                </span>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={onDownloadCurrent}
+              disabled={isDownloadingCurrent}
+              className="w-full py-3 px-4 rounded-xl bg-primary text-primary-foreground font-bold text-xs hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
+            >
+              {isDownloadingCurrent ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Exporting {activeMediaType === "video" ? "Video" : "Image"}...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  <span>Download Watermarked {activeMediaType === "video" ? "Video" : "Image"}</span>
+                </>
+              )}
+            </button>
+
+            {mediaCount && mediaCount > 1 && onStartProcessing && (
+              <button
+                type="button"
+                onClick={onStartProcessing}
+                className="w-full py-2.5 px-3 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <Archive className="w-3.5 h-3.5 text-primary" />
+                <span>Process & Download All ({mediaCount}) as ZIP</span>
+              </button>
+            )}
+          </div>
+        )}
+
         {/* SECTION: Layers Manager */}
         <div className="border border-border/80 rounded-2xl p-3.5 bg-background">
           <LayerManager

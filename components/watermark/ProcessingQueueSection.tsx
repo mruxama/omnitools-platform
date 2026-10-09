@@ -21,6 +21,11 @@ interface ProcessingQueueSectionProps {
   jobs: ProcessingJob[];
   isProcessing: boolean;
   exportOptions: ExportOptions;
+  mediaCount?: number;
+  activeMediaName?: string;
+  activeMediaType?: "image" | "video";
+  isDownloadingCurrent?: boolean;
+  onDownloadCurrent?: () => void;
   onCancel: () => void;
   onRetryFailed: () => void;
   onStartProcessing: () => void;
@@ -30,11 +35,64 @@ export function ProcessingQueueSection({
   jobs,
   isProcessing,
   exportOptions,
+  mediaCount = 0,
+  activeMediaName,
+  activeMediaType,
+  isDownloadingCurrent = false,
+  onDownloadCurrent,
   onCancel,
   onRetryFailed,
   onStartProcessing,
 }: ProcessingQueueSectionProps) {
-  if (jobs.length === 0) return null;
+  // If no jobs have been started, but media files are loaded in library, show sticky quick-download bar
+  if (jobs.length === 0) {
+    if (mediaCount === 0) return null;
+
+    return (
+      <div className="border-t border-border/80 bg-background/95 backdrop-blur-md p-3.5 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg z-30">
+        <div className="flex items-center gap-2.5 text-xs text-muted-foreground w-full sm:w-auto">
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="font-medium text-foreground truncate max-w-xs sm:max-w-md">
+            {activeMediaName ? `Ready: ${activeMediaName}` : `${mediaCount} media files loaded`}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+          {onDownloadCurrent && (
+            <button
+              type="button"
+              onClick={onDownloadCurrent}
+              disabled={isDownloadingCurrent}
+              className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm transition-all"
+            >
+              {isDownloadingCurrent ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Generating Output...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  <span>Download Watermarked {activeMediaType === "video" ? "Video" : "Image"}</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {mediaCount > 1 && (
+            <button
+              type="button"
+              onClick={onStartProcessing}
+              className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <Archive className="w-4 h-4 text-primary" />
+              <span>Process All ({mediaCount}) as ZIP</span>
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   const completedJobs = jobs.filter((j) => j.status === "completed");
   const failedJobs = jobs.filter((j) => j.status === "failed");
