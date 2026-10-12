@@ -1125,6 +1125,37 @@ export const TOOLS_REGISTRY: ToolItem[] = [
     ],
     status: "ready",
   },
+  {
+    id: "video-compressor",
+    name: "Video Compressor",
+    shortDescription: "Compress video files without losing quality using CRF, target size, or bitrate controls.",
+    longDescription: "Production-grade online video compressor. Reduce MP4, MOV, WebM, and MKV file sizes up to 80% with synchronized before/after preview, custom bitrate control, and 100% private in-browser compression.",
+    category: "productivity",
+    categoryName: "Productivity Tools",
+    path: "/tools/video-compressor",
+    icon: "Video",
+    keywords: ["video compressor", "compress video", "reduce video size", "mp4 compressor", "freeconvert alternative", "crf compressor"],
+    badges: ["popular", "featured", "new"],
+    relatedToolIds: ["omniget", "bulk-watermark", "base64-codec"],
+    features: [
+      "In-browser hardware-accelerated video compression engine",
+      "4 Compression Modes: Target Size (MB), Quality (CRF), Target Bitrate, and Resolution",
+      "Smart presets: WhatsApp (<16MB), Instagram/Reels, TikTok, YouTube, and Email (<10MB)",
+      "Synchronized side-by-side before & after video player comparison",
+      "Multi-video batch queue with single downloads and bulk ZIP export",
+      "100% client-side privacy: Zero file uploads to external servers"
+    ],
+    howToSteps: [
+      { title: "Select or drop video", desc: "Choose one or multiple video files from your device." },
+      { title: "Choose preset or mode", desc: "Select a preset like WhatsApp or fine-tune CRF and bitrate settings." },
+      { title: "Compress and download", desc: "Watch live compression progress, compare results, and download your optimized video." }
+    ],
+    faqs: [
+      { question: "Will compressing a video ruin its quality?", answer: "No. Our intelligent CRF (Constant Rate Factor) mode optimizes byte distribution so that perceptual quality remains visually lossless while cutting file size dramatically." },
+      { question: "Are my video files stored on your servers?", answer: "No. All video compression runs directly inside your browser on your device using hardware acceleration. Your files never leave your computer." }
+    ],
+    status: "ready",
+  },
 ];
 
 // Helper functions for registry queries

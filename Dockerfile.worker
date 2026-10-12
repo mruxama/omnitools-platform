@@ -1,0 +1,13 @@
+FROM node:20-alpine
+
+# Install native FFmpeg & FFprobe
+RUN apk add --no-cache ffmpeg
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY . .
+
+CMD ["node", "scripts/ffmpeg-worker.js"]
