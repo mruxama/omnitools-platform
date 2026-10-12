@@ -46,11 +46,24 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     }
   };
 
-  const results: ToolItem[] = query.trim() ? searchTools(query) : getPopularTools().slice(0, 6);
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+
+  const results: ToolItem[] = React.useMemo(() => {
+    let list: ToolItem[] = [];
+    if (query.trim()) {
+      list = searchTools(query);
+    } else {
+      list = getPopularTools();
+    }
+    if (activeCategory !== "all") {
+      list = list.filter((t) => t.category === activeCategory);
+    }
+    return list;
+  }, [query, activeCategory]);
 
   useEffect(() => {
     setSelectedIndex(0);
-  }, [query]);
+  }, [query, activeCategory]);
 
   const handleSelect = (tool: ToolItem) => {
     if (query.trim()) saveRecentSearch(query.trim());
@@ -146,11 +159,51 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           </div>
         )}
 
+        {/* Category Pills inside Search Modal */}
+        <div className="px-4 py-2 border-b border-border/70 flex items-center gap-1.5 overflow-x-auto text-xs bg-muted/20">
+          <button
+            onClick={() => setActiveCategory("all")}
+            className={`px-2.5 py-1 rounded-lg font-medium transition-colors shrink-0 ${
+              activeCategory === "all"
+                ? "bg-primary text-primary-foreground font-semibold"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            All
+          </button>
+          {[
+            { id: "image", label: "Media & Image" },
+            { id: "pdf", label: "PDF" },
+            { id: "productivity", label: "Productivity" },
+            { id: "calculators", label: "Calculators" },
+            { id: "text", label: "Text" },
+          ].map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={`px-2.5 py-1 rounded-lg font-medium transition-colors shrink-0 ${
+                activeCategory === cat.id
+                  ? "bg-primary text-primary-foreground font-semibold"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
         {/* Results List */}
         <div className="max-h-[60vh] overflow-y-auto p-2">
-          {!query.trim() && (
-            <div className="px-3 py-2 text-xs font-semibold text-muted-foreground flex items-center gap-1.5 uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-primary" /> Popular Tools
+          {!query.trim() ? (
+            <div className="px-3 py-2 text-xs font-semibold text-muted-foreground flex items-center justify-between uppercase tracking-wider">
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-primary" /> Popular Tools
+              </span>
+              <span className="text-[10px] font-normal lowercase">{results.length} tools</span>
+            </div>
+          ) : (
+            <div className="px-3 py-1.5 text-xs text-muted-foreground flex items-center justify-between">
+              <span>{results.length} tools found</span>
             </div>
           )}
 

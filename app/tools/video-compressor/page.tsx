@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
 import { VideoCompressorStudio } from '@/components/video-compressor/VideoCompressorStudio';
+import { ToolHubNavigation } from '@/components/navigation/ToolHubNavigation';
+import { getToolById } from '@/lib/tools/registry';
 
 export const metadata: Metadata = {
   title: 'Professional Video Compressor — Reduce Video File Size Online',
@@ -8,9 +10,19 @@ export const metadata: Metadata = {
 };
 
 export default function VideoCompressorPage() {
+  const tool = getToolById('video-compressor');
+
+  if (!tool) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <VideoCompressorStudio />
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    <ToolHubNavigation tool={tool}>
       <VideoCompressorStudio />
-    </div>
+    </ToolHubNavigation>
   );
 }

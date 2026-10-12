@@ -42,6 +42,8 @@ import {
   Globe,
   Film,
   Download,
+  Video,
+  Sparkles,
 } from "lucide-react";
 
 interface ToolIconProps {
@@ -89,6 +91,8 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Globe,
   Film,
   Download,
+  Video,
+  Sparkles,
 };
 
 export function ToolIcon({ name, className = "w-5 h-5" }: ToolIconProps) {

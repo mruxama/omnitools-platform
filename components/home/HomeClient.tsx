@@ -65,12 +65,14 @@ export function HomeClient() {
           <div className="pt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
             <span className="font-medium text-foreground">Popular:</span>
             {[
-              { name: "Merge PDF", path: "/tools/pdf/merge" },
-              { name: "Split PDF", path: "/tools/pdf/split" },
-              { name: "Compress Image", path: "/tools/image/compress" },
-              { name: "Percentage Calc", path: "/tools/calculators/percentage" },
-              { name: "Unit Converter", path: "/tools/calculators/unit-converter" },
-              { name: "QR Generator", path: "/tools/productivity/qr-code" },
+              { name: "⚡ Video Compressor", path: "/video-compressor" },
+              { name: "✨ AI Image Upscaler", path: "/image-upscaler" },
+              { name: "💧 Bulk Watermark", path: "/bulk-watermark" },
+              { name: "🔄 Universal Converter", path: "/convert" },
+              { name: "📄 Merge PDF", path: "/tools/pdf/merge" },
+              { name: "🗜️ Compress PDF", path: "/tools/pdf/compress" },
+              { name: "🌐 Web-Check", path: "/web-check" },
+              { name: "🔢 Percentage Calc", path: "/tools/calculators/percentage" },
             ].map((shortcut) => (
               <Link
                 key={shortcut.name}

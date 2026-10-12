@@ -88,28 +88,33 @@ export function Footer() {
             <h4 className="font-semibold text-xs tracking-wider uppercase text-foreground mb-3">Popular Tools</h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
+                <Link href="/video-compressor" className="hover:text-primary transition-colors">
+                  Video Compressor
+                </Link>
+              </li>
+              <li>
+                <Link href="/image-upscaler" className="hover:text-primary transition-colors">
+                  AI Image Upscaler
+                </Link>
+              </li>
+              <li>
+                <Link href="/bulk-watermark" className="hover:text-primary transition-colors">
+                  Bulk Watermark Studio
+                </Link>
+              </li>
+              <li>
+                <Link href="/convert" className="hover:text-primary transition-colors">
+                  Universal Converter
+                </Link>
+              </li>
+              <li>
                 <Link href="/tools/pdf/merge" className="hover:text-primary transition-colors">
                   Merge PDF
                 </Link>
               </li>
               <li>
-                <Link href="/tools/pdf/split" className="hover:text-primary transition-colors">
-                  Split PDF
-                </Link>
-              </li>
-              <li>
-                <Link href="/tools/image/compress" className="hover:text-primary transition-colors">
-                  Compress Image
-                </Link>
-              </li>
-              <li>
                 <Link href="/tools/calculators/percentage" className="hover:text-primary transition-colors">
                   Percentage Calculator
-                </Link>
-              </li>
-              <li>
-                <Link href="/tools/calculators/unit-converter" className="hover:text-primary transition-colors">
-                  Unit Converter
                 </Link>
               </li>
             </ul>
