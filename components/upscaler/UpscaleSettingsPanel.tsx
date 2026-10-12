@@ -3,7 +3,7 @@
 import React from 'react';
 import { UpscaleSettings, UpscaleMode, ScaleFactor, OutputFormat } from '@/lib/upscaler/types';
 import { MODEL_REGISTRY } from '@/lib/upscaler/modelRegistry';
-import { Sparkles, Sliders, Shield, Zap, Info } from 'lucide-react';
+import { Sparkles, Sliders, Shield, Zap, Info, Rocket } from 'lucide-react';
 
 interface UpscaleSettingsPanelProps {
   settings: UpscaleSettings;
@@ -25,32 +25,55 @@ export const UpscaleSettingsPanel: React.FC<UpscaleSettingsPanelProps> = ({
             Upscaling Configuration
           </h3>
         </div>
-        <span className="text-xs font-mono text-indigo-600 bg-indigo-50 dark:bg-indigo-950/50 px-2.5 py-1 rounded-full font-semibold">
-          100% In-Browser Engine
+        <span className="text-xs font-mono text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-full font-semibold flex items-center gap-1">
+          <Zap className="w-3.5 h-3.5" /> High Performance Mode
         </span>
       </div>
 
-      {/* Mode Selection: AI vs Faithful */}
+      {/* Mode Selection: Fast AI (Recommended) vs Deep Neural vs Faithful */}
       <div className="space-y-2">
         <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
           Enhancement Mode
         </label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button
             type="button"
-            onClick={() => onChange({ ...settings, mode: 'ai' })}
+            onClick={() => onChange({ ...settings, mode: 'fast-ai' })}
+            className={`p-3.5 rounded-xl border text-left transition-all relative ${
+              settings.mode === 'fast-ai'
+                ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500'
+                : 'border-slate-200 dark:border-slate-800 text-slate-600 hover:border-slate-300'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-1.5 font-bold text-xs text-indigo-600 dark:text-indigo-400">
+                <Rocket className="w-4 h-4" />
+                Fast AI Turbo
+              </div>
+              <span className="text-[10px] font-bold bg-indigo-600 text-white px-1.5 py-0.5 rounded font-mono">
+                &lt; 1 sec
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+              Multi-pass adaptive edge refinement. Instant high-speed upscaling with zero lag.
+            </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onChange({ ...settings, mode: 'neural-deep' })}
             className={`p-3.5 rounded-xl border text-left transition-all ${
-              settings.mode === 'ai'
-                ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-950 dark:text-indigo-200 ring-1 ring-indigo-500'
+              settings.mode === 'neural-deep'
+                ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500'
                 : 'border-slate-200 dark:border-slate-800 text-slate-600 hover:border-slate-300'
             }`}
           >
             <div className="flex items-center gap-1.5 font-bold text-xs text-indigo-600 dark:text-indigo-400 mb-1">
               <Sparkles className="w-4 h-4" />
-              AI Super-Resolution
+              Deep Neural AI
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-              Neural network tensor reconstruction. Synthesizes fine details and removes camera artifacts.
+              Full Real-ESRGAN ONNX weights. Synthesizes micro-details on GPU (takes 5-15s).
             </p>
           </button>
 
@@ -59,16 +82,16 @@ export const UpscaleSettingsPanel: React.FC<UpscaleSettingsPanelProps> = ({
             onClick={() => onChange({ ...settings, mode: 'faithful' })}
             className={`p-3.5 rounded-xl border text-left transition-all ${
               settings.mode === 'faithful'
-                ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-950 dark:text-indigo-200 ring-1 ring-indigo-500'
+                ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500'
                 : 'border-slate-200 dark:border-slate-800 text-slate-600 hover:border-slate-300'
             }`}
           >
             <div className="flex items-center gap-1.5 font-bold text-xs text-indigo-600 dark:text-indigo-400 mb-1">
               <Shield className="w-4 h-4" />
-              Faithful Resampling (No AI Hallucinations)
+              Faithful Resize
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-              Lanczos/Bicubic resampling. Guaranteed geometric fidelity for brand logos, labels, and text.
+              Lanczos resampling without generative hallucination for barcodes and logos.
             </p>
           </button>
         </div>
@@ -98,72 +121,45 @@ export const UpscaleSettingsPanel: React.FC<UpscaleSettingsPanelProps> = ({
           </div>
         </div>
 
-        {/* AI Model selector if AI mode is active */}
-        {settings.mode === 'ai' && (
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 block mb-2">
-              Neural Network Architecture
-            </label>
-            <select
-              value={settings.modelId}
-              onChange={(e) => onChange({ ...settings, modelId: e.target.value })}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium"
-            >
-              {Object.values(MODEL_REGISTRY).map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name} ({m.fileSizeMB} MB)
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-      </div>
-
-      {/* Output Format and Quality */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+        {/* Output Format */}
         <div>
-          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 block mb-2">
             Output Format
           </label>
           <select
             value={settings.outputFormat}
             onChange={(e) => onChange({ ...settings, outputFormat: e.target.value as OutputFormat })}
-            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium"
           >
-            <option value="image/png">PNG (Lossless & Alpha)</option>
+            <option value="image/png">PNG (Lossless &amp; Alpha)</option>
             <option value="image/webp">WebP (Modern Compact)</option>
             <option value="image/jpeg">JPEG (Universal Photo)</option>
           </select>
         </div>
+      </div>
 
-        <div>
-          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-            Tile Processing Size
+      {/* Deep Neural Model selection only if neural-deep is selected */}
+      {settings.mode === 'neural-deep' && (
+        <div className="p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+            ONNX Neural Model Weights
           </label>
           <select
-            value={settings.tileSize}
-            onChange={(e) => onChange({ ...settings, tileSize: Number(e.target.value) })}
-            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+            value={settings.modelId}
+            onChange={(e) => onChange({ ...settings, modelId: e.target.value })}
+            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-xs font-medium"
           >
-            <option value="128">128px (Low Memory / Mobile)</option>
-            <option value="256">256px (Standard Balanced)</option>
-            <option value="512">512px (Fast Desktop GPU)</option>
+            {Object.values(MODEL_REGISTRY).map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name} ({m.fileSizeMB} MB)
+              </option>
+            ))}
           </select>
+          <p className="text-[11px] text-slate-400">
+            Note: Deep Neural models run millions of tensor weights inside WebAssembly. For faster sub-second results, use Fast AI Turbo mode above.
+          </p>
         </div>
-
-        <div className="flex items-center gap-2 pt-6">
-          <input
-            type="checkbox"
-            id="sharpenToggle"
-            checked={settings.sharpen}
-            onChange={(e) => onChange({ ...settings, sharpen: e.target.checked })}
-            className="rounded text-indigo-600 accent-indigo-600 w-4 h-4 cursor-pointer"
-          />
-          <label htmlFor="sharpenToggle" className="text-xs font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
-            Edge Clarifying Sharpen
-          </label>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

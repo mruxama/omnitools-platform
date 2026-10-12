@@ -1,10 +1,10 @@
-export type UpscaleMode = 'ai' | 'faithful';
+export type UpscaleMode = 'fast-ai' | 'neural-deep' | 'faithful';
 
 export type ScaleFactor = 2 | 4;
 
 export type OutputFormat = 'image/png' | 'image/jpeg' | 'image/webp';
 
-export type ExecutionProvider = 'webgpu' | 'wasm' | 'canvas';
+export type ExecutionProvider = 'webgpu' | 'webgl' | 'wasm' | 'canvas';
 
 export interface ModelMetadata {
   id: string;
@@ -22,6 +22,7 @@ export interface ModelMetadata {
 
 export interface BrowserCapabilities {
   hasWebGPU: boolean;
+  hasWebGL: boolean;
   hasWasm: boolean;
   hasSimd: boolean;
   hasOffscreenCanvas: boolean;

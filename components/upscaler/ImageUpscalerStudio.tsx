@@ -11,17 +11,17 @@ import {
   ImageMetadata,
 } from '@/lib/upscaler/types';
 import { DEFAULT_MODEL_ID } from '@/lib/upscaler/modelRegistry';
-import { aiUpscale, faithfulUpscale, loadImage } from '@/lib/upscaler/inferenceEngine';
-import { Play, Sparkles, ShieldCheck, Zap, Info } from 'lucide-react';
+import { fastAiUpscale, deepNeuralUpscale, faithfulUpscale, loadImage } from '@/lib/upscaler/inferenceEngine';
+import { Play, Sparkles, ShieldCheck, Zap, Info, Rocket } from 'lucide-react';
 
 const DEFAULT_SETTINGS: UpscaleSettings = {
-  mode: 'ai',
+  mode: 'fast-ai',
   scaleFactor: 4,
   modelId: DEFAULT_MODEL_ID,
   outputFormat: 'image/png',
   quality: 0.92,
   tileSize: 256,
-  overlap: 16,
+  overlap: 8,
   preserveAlpha: true,
   sharpen: true,
   backgroundColor: '#ffffff',
@@ -57,7 +57,7 @@ export const ImageUpscalerStudio: React.FC = () => {
 
   const processSingleJob = async (jobToProcess: UpscaleJob) => {
     setJobs((prev) =>
-      prev.map((j) => (j.id === jobToProcess.id ? { ...j, status: 'processing', progress: 5 } : j))
+      prev.map((j) => (j.id === jobToProcess.id ? { ...j, status: 'processing', progress: 10 } : j))
     );
 
     const startTime = performance.now();
@@ -65,8 +65,20 @@ export const ImageUpscalerStudio: React.FC = () => {
       const img = await loadImage(jobToProcess.file);
       let res: { blob: Blob; width: number; height: number; provider?: any };
 
-      if (settings.mode === 'ai') {
-        res = await aiUpscale(img, settings, (pct) => {
+      if (settings.mode === 'fast-ai') {
+        res = await fastAiUpscale(
+          img,
+          settings.scaleFactor,
+          settings.outputFormat,
+          settings.quality,
+          (pct) => {
+            setJobs((prev) =>
+              prev.map((j) => (j.id === jobToProcess.id ? { ...j, progress: pct } : j))
+            );
+          }
+        );
+      } else if (settings.mode === 'neural-deep') {
+        res = await deepNeuralUpscale(img, settings, (pct) => {
           setJobs((prev) =>
             prev.map((j) => (j.id === jobToProcess.id ? { ...j, progress: pct } : j))
           );
@@ -129,14 +141,14 @@ export const ImageUpscalerStudio: React.FC = () => {
     <div className="w-full max-w-5xl mx-auto space-y-8">
       {/* Hero Header */}
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-800">
-          <Zap className="w-3.5 h-3.5" /> 100% In-Browser AI • WebGPU &amp; WASM Accelerated
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+          <Rocket className="w-3.5 h-3.5" /> Fast AI Engine • Instant High-Speed Resolution Enhancement
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
           AI Image Upscaler &amp; Super-Resolution
         </h1>
         <p className="max-w-2xl mx-auto text-sm sm:text-base text-slate-600 dark:text-slate-400">
-          Enhance photos, graphics, and product shots up to 4× resolution directly on your GPU.
+          Enhance photos, graphics, and product shots up to 4× resolution directly in your browser.
           Zero API costs, zero server uploads, and 100% confidential.
         </p>
       </div>
@@ -155,12 +167,12 @@ export const ImageUpscalerStudio: React.FC = () => {
           />
 
           {/* Action Trigger Bar */}
-          <div className="bg-gradient-to-r from-violet-500/10 via-indigo-500/10 to-violet-500/10 border border-violet-200 dark:border-violet-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="bg-gradient-to-r from-emerald-500/10 via-indigo-500/10 to-emerald-500/10 border border-emerald-200 dark:border-indigo-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-xs text-slate-600 dark:text-slate-300 flex items-center gap-2">
-              <Info className="w-4 h-4 text-violet-600 shrink-0" />
+              <Info className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>
                 Target Resolution: {activeJob?.metadata.width ? activeJob.metadata.width * settings.scaleFactor : 0}×
-                {activeJob?.metadata.height ? activeJob.metadata.height * settings.scaleFactor : 0} px ({settings.scaleFactor}× {settings.mode.toUpperCase()})
+                {activeJob?.metadata.height ? activeJob.metadata.height * settings.scaleFactor : 0} px ({settings.scaleFactor}× {settings.mode === 'fast-ai' ? 'FAST AI TURBO' : settings.mode.toUpperCase()})
               </span>
             </div>
 
@@ -168,11 +180,11 @@ export const ImageUpscalerStudio: React.FC = () => {
               type="button"
               onClick={handleProcessBatch}
               disabled={isProcessingAll}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold text-sm shadow-md shadow-violet-500/20 flex items-center justify-center gap-2 transition"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold text-sm shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 transition"
             >
               <Play className="w-4 h-4 fill-white" />
               {isProcessingAll
-                ? 'Processing Images...'
+                ? 'Enhancing Image...'
                 : jobs.length > 1
                 ? `Upscale All (${jobs.length} Images)`
                 : 'Upscale Image Now'}

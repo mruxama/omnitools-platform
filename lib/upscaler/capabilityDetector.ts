@@ -1,7 +1,7 @@
 import { BrowserCapabilities, ExecutionProvider } from './types';
 
 /**
- * Detects browser hardware capabilities including WebGPU support,
+ * Detects browser hardware capabilities including WebGPU, WebGL,
  * WebAssembly, OffscreenCanvas, and available memory.
  */
 export async function detectBrowserCapabilities(): Promise<BrowserCapabilities> {
@@ -17,10 +17,19 @@ export async function detectBrowserCapabilities(): Promise<BrowserCapabilities> 
     }
   }
 
+  let hasWebGL = false;
+  if (typeof document !== 'undefined') {
+    try {
+      const canvas = document.createElement('canvas');
+      hasWebGL = !!(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+    } catch {
+      hasWebGL = false;
+    }
+  }
+
   const hasWasm = typeof WebAssembly !== 'undefined';
   let hasSimd = false;
   if (hasWasm && typeof WebAssembly.validate === 'function') {
-    // Basic SIMD feature detection bytes
     const simdBytes = new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 26, 11]);
     try {
       hasSimd = WebAssembly.validate(simdBytes);
@@ -34,11 +43,11 @@ export async function detectBrowserCapabilities(): Promise<BrowserCapabilities> 
     ? (navigator as any).deviceMemory
     : 4;
 
-  // Conservative tile size: 256 for WebGPU/high-mem, 128 for WASM/low-mem
   const recommendedTileSize = hasWebGPU ? 256 : 128;
 
   return {
     hasWebGPU,
+    hasWebGL,
     hasWasm,
     hasSimd,
     hasOffscreenCanvas,
@@ -49,6 +58,7 @@ export async function detectBrowserCapabilities(): Promise<BrowserCapabilities> 
 
 export function getPreferredExecutionProvider(caps: BrowserCapabilities): ExecutionProvider {
   if (caps.hasWebGPU) return 'webgpu';
+  if (caps.hasWebGL) return 'webgl';
   if (caps.hasWasm) return 'wasm';
   return 'canvas';
 }
