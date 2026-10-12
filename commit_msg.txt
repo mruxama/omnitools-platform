@@ -1,0 +1,1 @@
+feat: enhance workflow studio automation with full scenario presets and multi-step pipeline engine  
