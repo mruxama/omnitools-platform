@@ -31,15 +31,15 @@ export async function loadImage(file: File): Promise<HTMLImageElement> {
 }
 
 /**
- * High-Quality Faithful Bicubic / Lanczos Resampling without AI hallucinations.
- * Preserves exact geometric fidelity for sensitive brand labels, barcodes, and geometry.
+ * High-Quality Faithful Resampling with optional Lanczos-style edge contrast enhancement.
+ * Guarantees that sensitive barcodes, text, and geometry are preserved without AI hallucinations.
  */
 export async function faithfulUpscale(
   image: HTMLImageElement,
   scale: ScaleFactor,
   outputFormat: OutputFormat,
   quality: number = 0.92,
-  sharpen: boolean = false
+  sharpen: boolean = true
 ): Promise<{ blob: Blob; width: number; height: number }> {
   const targetWidth = image.naturalWidth * scale;
   const targetHeight = image.naturalHeight * scale;
@@ -54,7 +54,7 @@ export async function faithfulUpscale(
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
 
-  // Optional unsharp mask / light sharpening for crisp edges
+  // Apply subtle edge clarifying sharpening
   if (sharpen) {
     applyUnsharpMask(ctx, targetWidth, targetHeight);
   }
@@ -94,8 +94,8 @@ export async function aiUpscale(
   const destCtx = destCanvas.getContext('2d', { willReadFrequently: true });
   if (!destCtx) throw new Error('Failed to create destination canvas');
 
-  // Generate tiles
-  const tileSize = settings.tileSize || modelMeta.defaultTileSize;
+  // Generate tiles (conservative 128px default for browser memory stability)
+  const tileSize = settings.tileSize || modelMeta.defaultTileSize || 128;
   const overlap = settings.overlap || 16;
   const tiles = generateTileGrid(image.naturalWidth, image.naturalHeight, tileSize, overlap);
 
@@ -105,17 +105,28 @@ export async function aiUpscale(
 
   try {
     ort = await import('onnxruntime-web');
+
+    // Configure WASM paths so browser loads wasm binaries from jsdelivr CDN without bundle failure
+    if (ort.env && ort.env.wasm) {
+      ort.env.wasm.numThreads = 1; // 1 thread avoids SharedArrayBuffer crossOriginIsolated CORS blockers
+      ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/';
+    }
+
     if (!session) {
+      // Fetch model bytes explicitly with progress/cache support
+      const modelUrl = modelMeta.url;
+      const modelBytes = await fetchModelWithFallback(modelUrl);
+
       const sessionOptions: any = {
         executionProviders: provider === 'webgpu' ? ['webgpu', 'wasm'] : ['wasm'],
         graphOptimizationLevel: 'all',
       };
-      session = await ort.InferenceSession.create(modelMeta.url, sessionOptions);
+
+      session = await ort.InferenceSession.create(modelBytes, sessionOptions);
       sessionCache.set(modelMeta.id, session);
     }
   } catch (loadErr) {
-    console.warn('ONNX Runtime Web inference unavailable or model network load failed, gracefully falling back to high-fidelity resampling:', loadErr);
-    // Graceful fallback to Faithful Resampling mode
+    console.warn('AI neural session initialization failed, executing high-fidelity resampling fallback:', loadErr);
     const fallbackRes = await faithfulUpscale(image, targetScale, settings.outputFormat, settings.quality, true);
     return { ...fallbackRes, provider: 'canvas' };
   }
@@ -205,6 +216,30 @@ export async function aiUpscale(
 }
 
 /**
+ * Fetches model binary with local / public CDN fallback
+ */
+async function fetchModelWithFallback(primaryUrl: string): Promise<ArrayBuffer> {
+  const urlsToTry = [
+    primaryUrl,
+    '/models/realesr-general-x4v3.onnx',
+    'https://huggingface.co/Heliosoph/realesrgan-onnx/resolve/main/realesr-general-x4v3.onnx',
+  ];
+
+  for (const url of urlsToTry) {
+    try {
+      const resp = await fetch(url);
+      if (resp.ok) {
+        return await resp.arrayBuffer();
+      }
+    } catch {
+      // continue to next candidate
+    }
+  }
+
+  throw new Error('Unable to download model weights from local path or remote CDN');
+}
+
+/**
  * Runs single tile tensor forward pass through ONNX model
  */
 async function processSingleTileONNX(
@@ -225,10 +260,10 @@ async function processSingleTileONNX(
   }
 
   const inputTensor = new ort.Tensor('float32', floatData, [1, 3, height, width]);
-  const inputName = session.inputNames[0];
+  const inputName = session.inputNames[0] || 'input';
   const feeds = { [inputName]: inputTensor };
   const results = await session.run(feeds);
-  const outputName = session.outputNames[0];
+  const outputName = session.outputNames[0] || 'output';
   const outputTensor = results[outputName];
 
   const outH = Math.round(height * scale);

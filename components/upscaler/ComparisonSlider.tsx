@@ -139,8 +139,12 @@ export const ComparisonSlider: React.FC<ComparisonSliderProps> = ({
         <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-[11px] font-mono z-20">
           Original ({originalWidth}×{originalHeight})
         </div>
-        <div className="absolute top-3 right-3 bg-indigo-600/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-[11px] font-mono font-bold z-20">
-          Upscaled ({upscaledWidth || originalWidth * 2}×{upscaledHeight || originalHeight * 2})
+        <div className={`absolute top-3 right-3 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-[11px] font-mono font-bold z-20 ${
+          upscaledUrl ? 'bg-emerald-600/90' : 'bg-slate-700/80'
+        }`}>
+          {upscaledUrl
+            ? `Upscaled Result (${upscaledWidth}×${upscaledHeight})`
+            : `Target Preview (${upscaledWidth || originalWidth * 2}×${upscaledHeight || originalHeight * 2}) — Click Upscale`}
         </div>
       </div>
 

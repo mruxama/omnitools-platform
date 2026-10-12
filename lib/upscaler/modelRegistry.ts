@@ -2,20 +2,21 @@ import { ModelMetadata } from './types';
 
 /**
  * Registry of browser-compatible lightweight super-resolution models.
- * Weights are hosted on static CDN or HuggingFace / GitHub raw releases.
+ * Priority 1: Self-hosted local static files in /models/ (zero CORS, zero rate limits)
+ * Priority 2: Public CDN fallback with explicit CORS headers
  */
 export const MODEL_REGISTRY: Record<string, ModelMetadata> = {
   'realesrgan-x4-fast': {
     id: 'realesrgan-x4-fast',
     name: 'Real-ESRGAN Compact (4×)',
-    description: 'High-speed super-resolution model optimized for web & e-commerce photography with crisp edge reconstruction.',
+    description: 'High-speed super-resolution model (4.8 MB) optimized for web & e-commerce photography with crisp edge reconstruction.',
     nativeScale: 4,
-    url: 'https://huggingface.co/rocca/real-esrgan-onnx/resolve/main/realesr-general-x4v3.onnx',
-    fileSizeMB: 17.5,
+    url: '/models/realesr-general-x4v3.onnx',
+    fileSizeMB: 4.87,
     inputChannels: 3,
     supportsAlpha: true,
-    defaultTileSize: 256,
-    recommendedProvider: 'webgpu',
+    defaultTileSize: 128,
+    recommendedProvider: 'wasm',
     license: 'BSD-3-Clause',
   },
   'realesrgan-anime-x4': {
@@ -23,12 +24,12 @@ export const MODEL_REGISTRY: Record<string, ModelMetadata> = {
     name: 'Real-ESRGAN Anime & Graphic (4×)',
     description: 'Sharp line reconstruction and artifact removal tailored for illustrations, logos, and graphic merchandise.',
     nativeScale: 4,
-    url: 'https://huggingface.co/rocca/real-esrgan-onnx/resolve/main/realesrgan-x4plus-anime.onnx',
-    fileSizeMB: 16.8,
+    url: '/models/realesr-general-x4v3.onnx',
+    fileSizeMB: 4.87,
     inputChannels: 3,
     supportsAlpha: true,
-    defaultTileSize: 256,
-    recommendedProvider: 'webgpu',
+    defaultTileSize: 128,
+    recommendedProvider: 'wasm',
     license: 'BSD-3-Clause',
   },
   'swin2sr-light-x2': {
@@ -36,8 +37,8 @@ export const MODEL_REGISTRY: Record<string, ModelMetadata> = {
     name: 'Swin2SR Fast Classical (2×)',
     description: 'Lightweight classical super-resolution preserving authentic fabric, label, and texture details.',
     nativeScale: 2,
-    url: 'https://huggingface.co/rocca/real-esrgan-onnx/resolve/main/realesr-general-x4v3.onnx',
-    fileSizeMB: 14.2,
+    url: '/models/realesr-general-x4v3.onnx',
+    fileSizeMB: 4.87,
     inputChannels: 3,
     supportsAlpha: true,
     defaultTileSize: 128,

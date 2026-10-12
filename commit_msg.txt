@@ -1,1 +1,1 @@
-feat: implement production-ready browser-based AI Image Upscaler with WebGPU, tile-based processing, and split comparison  
+fix: embed local model weights in public directory and configure wasm cdn paths to fix AI upscaler  
