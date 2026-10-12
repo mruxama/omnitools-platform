@@ -1156,6 +1156,37 @@ export const TOOLS_REGISTRY: ToolItem[] = [
     ],
     status: "ready",
   },
+  {
+    id: "image-upscaler",
+    name: "AI Image Upscaler",
+    shortDescription: "Upscale images 2× and 4× locally using in-browser WebGPU AI super-resolution.",
+    longDescription: "Production-grade, 100% browser-based AI Image Upscaler. Enhance photos, e-commerce products, and illustrations up to 4× resolution directly on your device GPU. Zero API keys, zero server uploads, complete privacy.",
+    category: "image",
+    categoryName: "Image Tools",
+    path: "/tools/image/upscaler",
+    icon: "Sparkles",
+    keywords: ["ai image upscaler", "super resolution", "upscale image", "image enhancer", "webgpu upscaler", "real-esrgan browser", "photo enlarger"],
+    badges: ["popular", "featured", "new"],
+    relatedToolIds: ["compress-image", "resize-image", "bulk-watermark"],
+    features: [
+      "100% In-browser neural network inference powered by WebGPU and ONNX Runtime Web",
+      "2× and 4× scale factors with Real-ESRGAN and Swin2SR architectures",
+      "Two processing modes: AI Super-Resolution and Faithful Resampling (zero hallucinations)",
+      "Conservative tile-based processing with seamless overlap blending for large images",
+      "Interactive before & after comparison slider with zoom and pan controls",
+      "Multi-image batch queue with individual downloads and bulk ZIP archive export"
+    ],
+    howToSteps: [
+      { title: "Upload images", desc: "Select or drag photos, product shots, or illustrations into the uploader." },
+      { title: "Select scale & mode", desc: "Choose 2× or 4× scaling and pick AI Super-Resolution or Faithful mode." },
+      { title: "Enhance and download", desc: "Process locally on your GPU, inspect the before/after slider, and download high-resolution outputs." }
+    ],
+    faqs: [
+      { question: "Do my images get uploaded to a cloud server?", answer: "No. All neural network super-resolution and image processing occurs 100% locally on your computer using WebGPU or WebAssembly. Your photos never leave your device." },
+      { question: "What is the difference between AI mode and Faithful mode?", answer: "AI mode reconstructs fine textures and removes compression artifacts using neural networks. Faithful mode uses Lanczos/Bicubic resampling without adding AI-generated details, ideal for barcodes, sensitive branding, and legal documents." }
+    ],
+    status: "ready",
+  },
 ];
 
 // Helper functions for registry queries
