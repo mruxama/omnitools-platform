@@ -1,17 +1,34 @@
 import { TileRect } from './types';
 
 /**
- * Decomposes an image of (width x height) into conservative tiles with
- * overlap padding to avoid boundary seam artifacts during AI super-resolution.
+ * Decomposes an image of (width x height) into safe tiles for in-browser processing.
+ * Caps the maximum number of tiles to prevent runaway loops on large images.
  */
 export function generateTileGrid(
   width: number,
   height: number,
-  tileSize: number,
-  overlap: number = 16
+  tileSize: number = 256,
+  overlap: number = 8
 ): TileRect[] {
+  // If the image is smaller than tileSize, process as a single tile
+  if (width <= tileSize && height <= tileSize) {
+    return [
+      {
+        x: 0,
+        y: 0,
+        width,
+        height,
+        paddedX: 0,
+        paddedY: 0,
+        paddedWidth: width,
+        paddedHeight: height,
+      },
+    ];
+  }
+
+  const effectiveTileSize = Math.max(128, tileSize);
+  const step = Math.max(64, effectiveTileSize - overlap * 2);
   const tiles: TileRect[] = [];
-  const step = Math.max(32, tileSize - overlap * 2);
 
   for (let y = 0; y < height; y += step) {
     for (let x = 0; x < width; x += step) {

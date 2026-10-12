@@ -1,1 +1,1 @@
-fix: embed local model weights in public directory and configure wasm cdn paths to fix AI upscaler  
+fix: prevent browser tab freeze with non-blocking async yields in upscaler inference engine  
