@@ -24,6 +24,7 @@ import {
   ArrowRight,
   ShieldCheck,
   Zap,
+  RotateCw,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { SearchModal } from "../search/SearchModal";
@@ -90,6 +91,20 @@ export function Navbar() {
       href: "/tools",
       tools: [
         {
+          name: "Smart Logo Remover",
+          href: "/logo-remover",
+          desc: "Inpaint & erase unwanted objects",
+          icon: Sparkles,
+          badge: "New",
+        },
+        {
+          name: "Bulk Video Rotator",
+          href: "/video-rotator",
+          desc: "90°, 180°, 270° orientation fix",
+          icon: RotateCw,
+          badge: "New",
+        },
+        {
           name: "Video Compressor",
           href: "/video-compressor",
           desc: "CRF, target size, & bitrate controls",
@@ -97,23 +112,10 @@ export function Navbar() {
           badge: "Popular",
         },
         {
-          name: "AI Image Upscaler",
-          href: "/image-upscaler",
-          desc: "2× & 4× local super-resolution",
-          icon: Sparkles,
-          badge: "New",
-        },
-        {
           name: "Bulk Watermark Studio",
           href: "/bulk-watermark",
           desc: "Batch logos & text for images & video",
           icon: Stamp,
-        },
-        {
-          name: "Video Downloader (OmniGet)",
-          href: "/video-downloader",
-          desc: "High-speed URL video extraction",
-          icon: Film,
         },
       ],
     },
@@ -152,6 +154,20 @@ export function Navbar() {
       href: "/tools/image",
       tools: [
         {
+          name: "Bulk HEIC to JPG & PNG",
+          href: "/heic-to-jpg",
+          desc: "Fast parallel iPhone photo conversion",
+          icon: ImageIcon,
+          badge: "New",
+        },
+        {
+          name: "AI Image Upscaler",
+          href: "/image-upscaler",
+          desc: "2× & 4× local super-resolution",
+          icon: Sparkles,
+          badge: "Popular",
+        },
+        {
           name: "Universal Converter",
           href: "/convert",
           desc: "Convert 200+ formats client-side",
@@ -161,18 +177,6 @@ export function Navbar() {
           name: "Image Compressor",
           href: "/tools/image/compress",
           desc: "Shrink PNG, JPG, WebM with preview",
-          icon: ImageIcon,
-        },
-        {
-          name: "Background Remover",
-          href: "/tools/image/background-remover",
-          desc: "Clean cutout transparency in seconds",
-          icon: Sparkles,
-        },
-        {
-          name: "Image Resizer & Crop",
-          href: "/tools/image/resize",
-          desc: "Exact pixel & aspect ratio scaling",
           icon: ImageIcon,
         },
       ],

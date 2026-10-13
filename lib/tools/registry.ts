@@ -1187,6 +1187,95 @@ export const TOOLS_REGISTRY: ToolItem[] = [
     ],
     status: "ready",
   },
+  {
+    id: "heic-converter",
+    name: "Bulk HEIC to JPG & PNG",
+    shortDescription: "Ultra-fast parallel batch conversion of iPhone HEIC/HEIF photos to JPG or PNG.",
+    longDescription: "Convert hundreds of Apple iPhone HEIC and HEIF photos in parallel directly inside your browser using WebAssembly. Retain maximum quality, customize resolutions, and download individually or in a ZIP archive.",
+    category: "image",
+    categoryName: "Image Tools",
+    path: "/heic-to-jpg",
+    icon: "FileImage",
+    keywords: ["heic to jpg", "heic to png", "iphone photo converter", "heif converter", "bulk heic", "apple photo converter"],
+    badges: ["popular", "featured", "new"],
+    relatedToolIds: ["image-upscaler", "compress-image", "bulk-watermark"],
+    features: [
+      "Process up to 300+ iPhone HEIC photos concurrently using libheif WebAssembly",
+      "Export to JPG, PNG, or WebP with fine-grained quality targets",
+      "Adaptive concurrency prevents memory overload and browser freezing",
+      "Bulk ZIP download with duplicate filename conflict resolution",
+      "100% Client-side processing with zero server uploads"
+    ],
+    howToSteps: [
+      { title: "Select HEIC files", desc: "Drag and drop or select photos or entire folders of iPhone HEIC pictures." },
+      { title: "Choose format & quality", desc: "Pick JPG, PNG, or WebP and adjust desired quality and dimensions." },
+      { title: "Convert & export", desc: "Watch live parallel progress and download converted files individually or as a single ZIP." }
+    ],
+    faqs: [
+      { question: "Is there a limit on how many HEIC files I can convert?", answer: "No arbitrary file limit is imposed. The adaptive worker pool safely schedules files based on available device memory so you can convert hundreds in a single batch." },
+      { question: "Do my personal photos touch any server?", answer: "No. All HEIC decoding and image encoding happen 100% inside your local web browser using WebAssembly." }
+    ],
+    status: "ready",
+  },
+  {
+    id: "video-rotator",
+    name: "Bulk Video Rotator",
+    shortDescription: "Fix sideways and upside-down smartphone & camera videos with 90°, 180°, and 270° orientation correction.",
+    longDescription: "Rotate video orientation physically and cleanly. Correct smartphone and DSLR portrait/landscape orientation by 90, 180, or 270 degrees, mirror horizontally or vertically, and retain full audio synchronization.",
+    category: "productivity",
+    categoryName: "Productivity Tools",
+    path: "/video-rotator",
+    icon: "RotateCw",
+    keywords: ["rotate video", "video rotator", "fix sideways video", "90 degree video rotate", "bulk video rotate", "orientation fixer"],
+    badges: ["popular", "new"],
+    relatedToolIds: ["video-compressor", "logo-remover", "bulk-watermark"],
+    features: [
+      "Physical frame transformation rotating by 90°, 180°, or 270°",
+      "Horizontal and vertical mirror flipping controls",
+      "Dimension swapping ensures proper aspect ratio (e.g. 1920×1080 to 1080×1920)",
+      "Preserves synchronized audio tracks via Web Audio API",
+      "Single file and batch processing with ZIP archive export"
+    ],
+    howToSteps: [
+      { title: "Upload video files", desc: "Select one or multiple video files in MP4, WebM, or MOV formats." },
+      { title: "Select rotation angle", desc: "Click 90° Clockwise, Counter-CW, 180°, or mirror flip buttons." },
+      { title: "Rotate & download", desc: "Process the orientation correction and download your upright videos." }
+    ],
+    faqs: [
+      { question: "Will the video be stretched when rotated by 90 degrees?", answer: "No. Output dimensions are properly swapped so landscape videos cleanly become tall portrait videos and vice-versa without stretching." },
+      { question: "Is audio preserved during video rotation?", answer: "Yes. Audio streams are captured and synchronized into the output container." }
+    ],
+    status: "ready",
+  },
+  {
+    id: "logo-remover",
+    name: "Smart Logo & Object Remover",
+    shortDescription: "Erase logos, watermarks, timestamps, and unwanted elements from images and videos.",
+    longDescription: "Boundary-diffusion smart inpainting and concealment utility for photos and videos. Draw or brush over unwanted objects and seamlessly inpaint or blur them 100% in your browser.",
+    category: "image",
+    categoryName: "Image Tools",
+    path: "/logo-remover",
+    icon: "Sparkles",
+    keywords: ["watermark remover", "logo remover", "object remover", "inpaint image", "video logo remover", "erase watermark"],
+    badges: ["popular", "featured", "new"],
+    relatedToolIds: ["image-upscaler", "bulk-watermark", "video-rotator"],
+    features: [
+      "Multi-mode inpainting: Smart Boundary Inpaint, Blur Concealment, Pixelate, and Solid Fill",
+      "Interactive brush and rectangle selection controls with adjustable brush radius",
+      "Video logo removal with timestamp range control and real-time canvas concealment",
+      "100% In-browser processing with zero server uploads and zero subscription fees"
+    ],
+    howToSteps: [
+      { title: "Upload media", desc: "Choose an image or video containing an unwanted logo or watermark." },
+      { title: "Brush or mark the object", desc: "Use the brush or box tool to highlight the area to conceal." },
+      { title: "Erase & export", desc: "Execute smart inpainting and download your cleaned media." }
+    ],
+    faqs: [
+      { question: "How does the smart inpainting work?", answer: "It propagates surrounding boundary colors inward using multi-pass gradient diffusion to naturally reconstruct the background behind the removed object." },
+      { question: "Can I remove watermarks from videos too?", answer: "Yes. Switch to the Video Logo Remover tab, pause at the watermark, place your concealment box, and export the cleaned video." }
+    ],
+    status: "ready",
+  },
 ];
 
 // Helper functions for registry queries
