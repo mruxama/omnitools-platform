@@ -93,7 +93,7 @@ export function BulkVideoConverterStudio() {
         setJobs(updatedJobs as ConverterJobItem[]);
         setStats(updatedStats);
       },
-      getRecommendedConcurrency("video")
+      getRecommendedConcurrency("fast-video")
     );
   });
 
@@ -113,8 +113,8 @@ export function BulkVideoConverterStudio() {
     newJobs.forEach(async (job) => {
       try {
         const analysis = await inspectVideoFile(job.file);
-        setJobs((prev) =>
-          prev.map((j) => (j.id === job.id ? { ...j, analysis } : j))
+        queueManager.updateJobs((current) =>
+          current.map((j) => (j.id === job.id ? { ...j, analysis } : j))
         );
       } catch (err) {
         console.warn("Analysis failed for", job.name, err);
@@ -153,8 +153,8 @@ export function BulkVideoConverterStudio() {
   };
 
   const handleApplyConfigToAllQueued = () => {
-    setJobs((prev) =>
-      prev.map((j) => (j.status === "pending" ? { ...j, config: { ...config } } : j))
+    queueManager.updateJobs((current) =>
+      current.map((j) => (j.status === "pending" ? { ...j, config: { ...config } } : j))
     );
   };
 

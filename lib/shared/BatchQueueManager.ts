@@ -39,7 +39,7 @@ export interface ConcurrencyOptions {
 /**
  * Calculates safe concurrent worker count based on device hardware and memory limits.
  */
-export function getRecommendedConcurrency(itemType: "image" | "video" | "heic"): number {
+export function getRecommendedConcurrency(itemType: "image" | "video" | "fast-video" | "heic"): number {
   if (typeof navigator === "undefined") return 2;
   const cores = navigator.hardwareConcurrency || 4;
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -47,12 +47,17 @@ export function getRecommendedConcurrency(itemType: "image" | "video" | "heic"):
   );
 
   if (isMobile) {
-    if (itemType === "video") return 1;
+    if (itemType === "video" || itemType === "fast-video") return 1;
     if (itemType === "heic") return 2;
     return 1;
   }
 
   // Desktop
+  if (itemType === "fast-video") {
+    // Fast remuxing has minimal CPU overhead; allow 3-4 concurrent workers on desktop
+    return Math.min(4, Math.max(2, Math.floor(cores / 2)));
+  }
+
   if (itemType === "video") {
     // Video transcoding/recording is CPU & canvas intensive
     return Math.min(2, Math.max(1, Math.floor(cores / 4)));
@@ -109,6 +114,11 @@ export class BatchQueueManager<TConfig, TResult> {
     if (this.isRunning) {
       this.pump();
     }
+  }
+
+  public updateJobs(updater: (jobs: BaseMediaJob<TConfig, TResult>[]) => BaseMediaJob<TConfig, TResult>[]) {
+    this.jobs = updater(this.jobs);
+    this.notify();
   }
 
   public removeJob(id: string) {

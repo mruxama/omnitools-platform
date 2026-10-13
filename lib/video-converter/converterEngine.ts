@@ -245,12 +245,32 @@ export async function transcodeVideoInBrowser(
           }
         };
 
+        // Speed up playback to transcode 2x-4x faster
+        try {
+          video.playbackRate = 3.0;
+        } catch {
+          // fallback to 1.0 if browser caps playback rate
+        }
+
         try {
           await video.play();
         } catch {
           video.muted = true;
+          try {
+            video.playbackRate = 3.0;
+          } catch {}
           await video.play();
         }
+
+        // Failsafe timer: in case onended does not fire in background tab
+        const maxExpectedMs = Math.ceil((duration / (video.playbackRate || 1)) * 1000) + 4000;
+        setTimeout(() => {
+          if (recorder && recorder.state === "recording") {
+            try {
+              recorder.stop();
+            } catch {}
+          }
+        }, maxExpectedMs);
       } catch (err) {
         cleanup();
         reject(err);
