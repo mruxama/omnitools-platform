@@ -88,6 +88,11 @@ export function Footer() {
             <h4 className="font-semibold text-xs tracking-wider uppercase text-foreground mb-3">Popular Tools</h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
+                <Link href="/iphone-video-converter" className="hover:text-primary transition-colors">
+                  iPhone Video Converter
+                </Link>
+              </li>
+              <li>
                 <Link href="/video-compressor" className="hover:text-primary transition-colors">
                   Video Compressor
                 </Link>

@@ -91,6 +91,13 @@ export function Navbar() {
       href: "/tools",
       tools: [
         {
+          name: "iPhone Video Converter",
+          href: "/iphone-video-converter",
+          desc: "Fast lossless MOV/HEVC to MP4",
+          icon: Video,
+          badge: "New",
+        },
+        {
           name: "Smart Logo Remover",
           href: "/logo-remover",
           desc: "Inpaint & erase unwanted objects",
@@ -108,7 +115,7 @@ export function Navbar() {
           name: "Video Compressor",
           href: "/video-compressor",
           desc: "CRF, target size, & bitrate controls",
-          icon: Video,
+          icon: Film,
           badge: "Popular",
         },
         {

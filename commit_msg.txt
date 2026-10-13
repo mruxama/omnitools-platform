@@ -1,1 +1,0 @@
-fix: prevent browser tab freeze with non-blocking async yields in upscaler inference engine  

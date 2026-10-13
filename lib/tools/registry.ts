@@ -1276,6 +1276,37 @@ export const TOOLS_REGISTRY: ToolItem[] = [
     ],
     status: "ready",
   },
+  {
+    id: "iphone-video-converter",
+    name: "Bulk iPhone Video Converter",
+    shortDescription: "Convert hundreds of iPhone MOV, HEVC and other videos to MP4 with smart quality preservation.",
+    longDescription: "Ultra-fast bulk video converter tailored for iPhone MOV, HEVC, and modern camera videos. Features intelligent stream-copy remuxing for instant, lossless MOV to MP4 conversion with zero re-encoding, preserving full 4K resolution, 60fps, color, and audio synchronization 100% locally in your browser.",
+    category: "productivity",
+    categoryName: "Productivity Tools",
+    path: "/iphone-video-converter",
+    icon: "Video",
+    keywords: ["iphone video converter", "mov to mp4", "hevc to mp4", "convert mov", "bulk video converter", "lossless remux", "stream copy"],
+    badges: ["popular", "featured", "new"],
+    relatedToolIds: ["video-compressor", "video-rotator", "bulk-watermark"],
+    features: [
+      "Lossless Stream Copy (Remux) engine: Instant MOV to MP4 container conversion without re-encoding",
+      "Process 200–300+ videos per batch with adaptive hardware concurrency and progress tracking",
+      "Comprehensive codec detection: HEVC, H.264, ProRes, AAC, PCM, and HDR color metadata",
+      "Multiple output targets (MP4, MOV, WebM, MKV) with custom resolution and framerate controls",
+      "100% Browser-based security: Zero server uploads, zero subscriptions, complete privacy"
+    ],
+    howToSteps: [
+      { title: "Select or drop videos", desc: "Upload single videos, folders, or hundreds of iPhone MOV/MP4 files." },
+      { title: "Choose conversion mode", desc: "Keep Auto/Smart for instant lossless remuxing or select custom resolution." },
+      { title: "Convert & export", desc: "Convert your batch with real-time speed metrics and export individually or as a single ZIP archive." }
+    ],
+    faqs: [
+      { question: "What is Lossless Stream Copy?", answer: "When video and audio codecs inside your MOV file are already compatible with MP4 (such as H.264/HEVC and AAC), our engine repacks the media container instantly without re-encoding, keeping 100% of your visual and audio quality intact." },
+      { question: "Does this handle iPhone HDR or 4K 60fps recordings?", answer: "Yes! Stream-copy mode maintains all original 4K resolution, 60fps frame rates, and color characteristics." },
+      { question: "Are my personal videos uploaded to a cloud server?", answer: "Never. All processing executes 100% locally on your device inside your browser." }
+    ],
+    status: "ready",
+  },
 ];
 
 // Helper functions for registry queries

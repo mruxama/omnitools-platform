@@ -139,6 +139,10 @@ export class BatchQueueManager<TConfig, TResult> {
     this.notify();
   }
 
+  public resume() {
+    this.start();
+  }
+
   public cancelAll() {
     this.isCancelled = true;
     this.isRunning = false;
