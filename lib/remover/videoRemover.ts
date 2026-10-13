@@ -155,11 +155,22 @@ export async function removeLogoFromVideo(
                 ctx.fillStyle = options.fillColor || "#000000";
                 ctx.fillRect(x, y, rw, rh);
               } else {
-                // blur concealment
-                ctx.save();
-                ctx.filter = `blur(${options.blurRadius || 16}px)`;
-                ctx.drawImage(canvas, x, y, rw, rh, x, y, rw, rh);
-                ctx.restore();
+                // blur concealment: copy region to small temp canvas, blur, and draw back only in rect
+                const blurR = options.blurRadius || 16;
+                const temp = document.createElement("canvas");
+                temp.width = rw;
+                temp.height = rh;
+                const tCtx = temp.getContext("2d");
+                if (tCtx) {
+                  tCtx.drawImage(canvas, x, y, rw, rh, 0, 0, rw, rh);
+                  ctx.save();
+                  ctx.beginPath();
+                  ctx.rect(x, y, rw, rh);
+                  ctx.clip();
+                  ctx.filter = `blur(${blurR}px)`;
+                  ctx.drawImage(temp, 0, 0, rw, rh, x, y, rw, rh);
+                  ctx.restore();
+                }
               }
             }
           }
@@ -182,7 +193,13 @@ export async function removeLogoFromVideo(
           }
         };
 
-        await video.play();
+        try {
+          await video.play();
+        } catch {
+          // If browser policy prevents unmuted playback without user interaction, mute and play
+          video.muted = true;
+          await video.play();
+        }
       } catch (err) {
         cleanup();
         reject(err);

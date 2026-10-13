@@ -21,11 +21,14 @@ export interface HeicConversionResult {
  * Checks if a file is a HEIC/HEIF image by extension or MIME type.
  */
 export function isHeicFile(file: File): boolean {
-  const name = file.name.toLowerCase();
-  const type = file.type.toLowerCase();
+  const name = (file.name || "").toLowerCase();
+  const type = (file.type || "").toLowerCase();
   return (
     name.endsWith(".heic") ||
     name.endsWith(".heif") ||
+    name.endsWith(".heics") ||
+    name.endsWith(".heifs") ||
+    name.endsWith(".hif") ||
     type === "image/heic" ||
     type === "image/heif" ||
     type === "image/heic-sequence" ||

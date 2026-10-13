@@ -216,7 +216,12 @@ export async function rotateVideoPhysically(
           }
         };
 
-        await video.play();
+        try {
+          await video.play();
+        } catch {
+          video.muted = true;
+          await video.play();
+        }
       } catch (err) {
         cleanup();
         reject(err);

@@ -38,13 +38,15 @@ export function SmartLogoRemoverStudio() {
 
   // Video state
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string>("");
   const [videoDuration, setVideoDuration] = useState(0);
-  const [videoCurrentTime, setVideoCurrentTime] = useState(0);
-  const [videoRects, setVideoRects] = useState<MaskRect[]>([]);
+  const [videoDimensions, setVideoDimensions] = useState<{ width: number; height: number }>({ width: 1280, height: 720 });
+  const [videoNormalizedRects, setVideoNormalizedRects] = useState<{ x: number; y: number; width: number; height: number }[]>([]);
   const [videoTimeRange, setVideoTimeRange] = useState({ start: 0, end: 10 });
   const [videoCleanedResult, setVideoCleanedResult] = useState<{ blob: Blob; outputName: string } | null>(null);
   const [videoProgress, setVideoProgress] = useState(0);
   const [isProcessingVideo, setIsProcessingVideo] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [videoOptions, setVideoOptions] = useState<VideoLogoRemoverOptions>({
     rects: [],
     startTime: 0,
@@ -74,6 +76,19 @@ export function SmartLogoRemoverStudio() {
     };
     return () => URL.revokeObjectURL(url);
   }, [imageFile]);
+
+  // Video URL effect
+  useEffect(() => {
+    if (!videoFile) {
+      setVideoUrl("");
+      return;
+    }
+    const url = URL.createObjectURL(videoFile);
+    setVideoUrl(url);
+    setVideoCleanedResult(null);
+    setVideoNormalizedRects([]);
+    return () => URL.revokeObjectURL(url);
+  }, [videoFile]);
 
   // Render image onto display canvas
   useEffect(() => {
@@ -216,19 +231,27 @@ export function SmartLogoRemoverStudio() {
 
   // Video Process
   const handleProcessVideo = async () => {
-    if (!videoFile || videoRects.length === 0) {
-      alert("Please pause the video and drag a box over the logo to conceal first.");
+    if (!videoFile || videoNormalizedRects.length === 0) {
+      alert("Please pause the video and drag or click a box over the logo to conceal first.");
       return;
     }
     setIsProcessingVideo(true);
     setVideoProgress(0);
+
+    // Convert normalized coordinates (0..1) to actual video pixel dimensions
+    const scaledRects: MaskRect[] = videoNormalizedRects.map((nr) => ({
+      x: Math.round(nr.x * videoDimensions.width),
+      y: Math.round(nr.y * videoDimensions.height),
+      width: Math.round(nr.width * videoDimensions.width),
+      height: Math.round(nr.height * videoDimensions.height),
+    }));
 
     try {
       const res = await removeLogoFromVideo(
         videoFile,
         {
           ...videoOptions,
-          rects: videoRects,
+          rects: scaledRects,
           startTime: videoTimeRange.start,
           endTime: videoTimeRange.end,
         },
@@ -470,13 +493,19 @@ export function SmartLogoRemoverStudio() {
                 {/* Video Player with Interactive Mask Box */}
                 <div className="relative max-w-2xl mx-auto aspect-video bg-black rounded-2xl overflow-hidden flex items-center justify-center">
                   <video
-                    src={URL.createObjectURL(videoFile)}
+                    ref={videoRef}
+                    src={videoUrl}
                     controls
                     playsInline
                     onLoadedMetadata={(e) => {
-                      const dur = (e.target as HTMLVideoElement).duration || 10;
+                      const v = e.target as HTMLVideoElement;
+                      const dur = v.duration || 10;
                       setVideoDuration(dur);
                       setVideoTimeRange({ start: 0, end: dur });
+                      setVideoDimensions({
+                        width: v.videoWidth || 1280,
+                        height: v.videoHeight || 720,
+                      });
                     }}
                     className="w-full h-full object-contain"
                   />
@@ -484,22 +513,35 @@ export function SmartLogoRemoverStudio() {
                   <div
                     onClick={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
-                      const x = e.clientX - rect.left - 40;
-                      const y = e.clientY - rect.top - 20;
-                      setVideoRects([{ x: Math.max(0, x), y: Math.max(0, y), width: 100, height: 40 }]);
+                      const clickX = e.clientX - rect.left;
+                      const clickY = e.clientY - rect.top;
+                      const boxW = 100;
+                      const boxH = 40;
+                      const normX = Math.max(0, Math.min(1 - boxW / rect.width, (clickX - boxW / 2) / rect.width));
+                      const normY = Math.max(0, Math.min(1 - boxH / rect.height, (clickY - boxH / 2) / rect.height));
+                      const normW = Math.min(1 - normX, boxW / rect.width);
+                      const normH = Math.min(1 - normY, boxH / rect.height);
+                      setVideoNormalizedRects([
+                        {
+                          x: normX,
+                          y: normY,
+                          width: normW,
+                          height: normH,
+                        },
+                      ]);
                     }}
                     className="absolute inset-0 cursor-crosshair"
                   >
-                    {videoRects.map((r, i) => (
+                    {videoNormalizedRects.map((r, i) => (
                       <div
                         key={i}
                         style={{
-                          left: `${r.x}px`,
-                          top: `${r.y}px`,
-                          width: `${r.width}px`,
-                          height: `${r.height}px`,
+                          left: `${r.x * 100}%`,
+                          top: `${r.y * 100}%`,
+                          width: `${r.width * 100}%`,
+                          height: `${r.height * 100}%`,
                         }}
-                        className="absolute border-2 border-red-500 bg-red-500/30 flex items-center justify-center text-[10px] text-white font-bold"
+                        className="absolute border-2 border-red-500 bg-red-500/30 flex items-center justify-center text-[10px] text-white font-bold rounded shadow-md pointer-events-none"
                       >
                         Logo Mask
                       </div>

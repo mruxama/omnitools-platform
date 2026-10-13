@@ -111,9 +111,23 @@ export function blurRegion(
   bCtx.filter = `blur(${blurRadius}px)`;
   bCtx.drawImage(ctx.canvas, 0, 0);
 
-  // Mask clip
+  // Draw the blurred image strictly where the mask is active
+  // We create a composite layer: draw blurCanvas, mask with maskCanvas using destination-in, then draw over original ctx
+  const maskedBlurCanvas = document.createElement("canvas");
+  maskedBlurCanvas.width = width;
+  maskedBlurCanvas.height = height;
+  const mbCtx = maskedBlurCanvas.getContext("2d");
+  if (!mbCtx) return;
+
+  // 1. Draw blurred version
+  mbCtx.drawImage(blurCanvas, 0, 0);
+  // 2. Keep only pixels where maskCanvas has content
+  mbCtx.globalCompositeOperation = "destination-in";
+  mbCtx.drawImage(maskCanvas, 0, 0);
+
+  // 3. Composite back onto main canvas
   ctx.save();
-  ctx.drawImage(blurCanvas, 0, 0);
+  ctx.drawImage(maskedBlurCanvas, 0, 0);
   ctx.restore();
 }
 
