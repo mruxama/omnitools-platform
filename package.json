@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node -e \"const fs=require('fs'); fs.mkdirSync('public/ffmpeg', {recursive:true}); try{fs.copyFileSync('node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js', 'public/ffmpeg/ffmpeg-core.js'); fs.copyFileSync('node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm', 'public/ffmpeg/ffmpeg-core.wasm');}catch(e){}\" && prisma generate && next build",
+    "build": "node -e \"const fs=require('fs'); fs.mkdirSync('public/ffmpeg', {recursive:true}); try{fs.copyFileSync('node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js', 'public/ffmpeg/ffmpeg-core.js'); fs.copyFileSync('node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm', 'public/ffmpeg/ffmpeg-core.wasm'); fs.copyFileSync('node_modules/@ffmpeg/ffmpeg/dist/esm/worker.js', 'public/ffmpeg/ffmpeg-worker.js'); fs.copyFileSync('node_modules/@ffmpeg/ffmpeg/dist/esm/const.js', 'public/ffmpeg/const.js'); fs.copyFileSync('node_modules/@ffmpeg/ffmpeg/dist/esm/errors.js', 'public/ffmpeg/errors.js');}catch(e){}\" && prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",

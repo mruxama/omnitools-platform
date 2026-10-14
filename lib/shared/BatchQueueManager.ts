@@ -54,8 +54,9 @@ export function getRecommendedConcurrency(itemType: "image" | "video" | "fast-vi
 
   // Desktop
   if (itemType === "fast-video") {
-    // Fast remuxing has minimal CPU overhead; allow 3-4 concurrent workers on desktop
-    return Math.min(4, Math.max(2, Math.floor(cores / 2)));
+    // Single-threaded FFmpeg.wasm runtime requires sequential job execution (1 at a time)
+    // to prevent virtual file collisions, race conditions, and out-of-memory errors.
+    return 1;
   }
 
   if (itemType === "video") {

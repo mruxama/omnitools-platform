@@ -536,9 +536,19 @@ export function BulkVideoConverterStudio() {
                           <span className="text-muted-foreground">Waiting</span>
                         )}
                         {job.status === "failed" && (
-                          <span className="inline-flex items-center gap-1 text-red-600 font-medium">
-                            <AlertCircle className="w-3.5 h-3.5" /> Failed
-                          </span>
+                          <div className="flex flex-col items-start gap-0.5">
+                            <span className="inline-flex items-center gap-1 text-red-600 font-medium text-[11px]">
+                              <AlertCircle className="w-3.5 h-3.5" /> Failed
+                            </span>
+                            {job.error && (
+                              <span
+                                className="text-[10px] text-red-500/80 max-w-[140px] truncate"
+                                title={job.error}
+                              >
+                                {job.error}
+                              </span>
+                            )}
+                          </div>
                         )}
                       </td>
                       <td className="p-3 text-right">

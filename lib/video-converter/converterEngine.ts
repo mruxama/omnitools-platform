@@ -11,19 +11,24 @@ let ffmpegInstance: FFmpeg | null = null;
 let ffmpegLoadingPromise: Promise<FFmpeg> | null = null;
 
 /**
- * Fast ISO-BMFF stream remuxer and atom brand restamper.
- * Updates QuickTime ftyp atom to ISO MP4 (mp42/isom) compatible brands.
+ * Fast ISO-BMFF zero-copy stream remuxer and atom brand restamper.
+ * Updates QuickTime ftyp atom to universal ISO MP4 (mp42/isom) compatible brands.
+ * Uses zero-copy Blob.slice() so even multi-gigabyte 4K iPhone videos process in milliseconds with zero memory overhead.
  */
 export async function losslessRemuxMovToMp4(
   file: File,
   outputName: string,
-  onProgress?: (percent: number) => void
+  onProgress?: (percent: number) => void,
+  analysis?: VideoAnalysisResult
 ): Promise<VideoConversionOutput> {
-  if (onProgress) onProgress(10);
-  const buffer = await file.arrayBuffer();
-  if (onProgress) onProgress(35);
-  const bytes = new Uint8Array(buffer);
-  const dataView = new DataView(buffer);
+  if (onProgress) onProgress(15);
+
+  // Read only the first 4KB header to locate and inspect the ftyp atom
+  const headerBuffer = await file.slice(0, 4096).arrayBuffer();
+  if (onProgress) onProgress(45);
+
+  const bytes = new Uint8Array(headerBuffer);
+  const dataView = new DataView(headerBuffer);
 
   let ftypOffset = -1;
   let ftypSize = 0;
@@ -31,6 +36,7 @@ export async function losslessRemuxMovToMp4(
 
   while (offset + 8 <= bytes.length) {
     const size = dataView.getUint32(offset);
+    if (size < 8) break;
     const boxType = String.fromCharCode(
       bytes[offset + 4],
       bytes[offset + 5],
@@ -43,14 +49,13 @@ export async function losslessRemuxMovToMp4(
       ftypSize = size;
       break;
     }
-    if (size === 0) break;
-    offset += size === 1 ? dataView.getUint32(offset + 8) : size;
+    offset += size;
   }
 
   const mp4Ftyp = new Uint8Array([
     0x00, 0x00, 0x00, 0x20, // size 32
     0x66, 0x74, 0x79, 0x70, // 'ftyp'
-    0x6d, 0x70, 0x34, 0x32, // 'mp42'
+    0x6d, 0x70, 0x34, 0x32, // 'mp42' (major brand)
     0x00, 0x00, 0x00, 0x00, // minor version 0
     0x69, 0x73, 0x6f, 0x6d, // 'isom'
     0x6d, 0x70, 0x34, 0x32, // 'mp42'
@@ -59,11 +64,18 @@ export async function losslessRemuxMovToMp4(
   ]);
 
   let finalBlob: Blob;
-  if (ftypOffset === 0 && ftypSize > 0) {
-    const rest = bytes.slice(ftypSize);
-    finalBlob = new Blob([mp4Ftyp, rest], { type: "video/mp4" });
+  if (ftypOffset === 0 && ftypSize > 0 && ftypSize <= file.size) {
+    // Standard iPhone MOV: ftyp at offset 0, slice remainder without copying buffer memory
+    finalBlob = new Blob([mp4Ftyp, file.slice(ftypSize)], { type: "video/mp4" });
+  } else if (ftypOffset > 0 && ftypSize > 0) {
+    // QuickTime with leading atom (e.g. wide)
+    finalBlob = new Blob(
+      [file.slice(0, ftypOffset), mp4Ftyp, file.slice(ftypOffset + ftypSize)],
+      { type: "video/mp4" }
+    );
   } else {
-    finalBlob = new Blob([mp4Ftyp, bytes], { type: "video/mp4" });
+    // Fallback: prepend mp4 ftyp atom to stream
+    finalBlob = new Blob([mp4Ftyp, file], { type: "video/mp4" });
   }
 
   if (onProgress) onProgress(100);
@@ -72,9 +84,9 @@ export async function losslessRemuxMovToMp4(
     blob: finalBlob,
     outputName,
     size: finalBlob.size,
-    duration: 0,
-    width: 0,
-    height: 0,
+    duration: analysis?.duration || 0,
+    width: analysis?.width || 1920,
+    height: analysis?.height || 1080,
     usedRemux: true,
     format: "mp4",
   };
@@ -101,22 +113,37 @@ export async function getFFmpeg(onLog?: (msg: string) => void): Promise<FFmpeg> 
       ffmpeg.on("log", ({ message }) => onLog(message));
     }
 
-    // Attempt to load from local public/ffmpeg/ first; fallback to jsdelivr CDN if needed
     try {
+      // 1. Attempt to load from local public/ffmpeg/ first (ESM)
       const coreURL = await toBlobURL("/ffmpeg/ffmpeg-core.js", "text/javascript");
       const wasmURL = await toBlobURL("/ffmpeg/ffmpeg-core.wasm", "application/wasm");
       await ffmpeg.load({ coreURL, wasmURL });
-    } catch {
-      // CDN Fallback
-      const baseURL = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
-      const coreURL = await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript");
-      const wasmURL = await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm");
-      await ffmpeg.load({ coreURL, wasmURL });
+    } catch (localErr) {
+      console.warn("Local FFmpeg load failed, attempting jsdelivr CDN fallback:", localErr);
+      try {
+        // 2. CDN Fallback via jsdelivr ESM
+        const baseURL = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
+        const coreURL = await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript");
+        const wasmURL = await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm");
+        await ffmpeg.load({ coreURL, wasmURL });
+      } catch (cdnErr) {
+        console.warn("jsdelivr fallback failed, attempting unpkg CDN fallback:", cdnErr);
+        // 3. CDN Fallback via unpkg ESM
+        const unpkgBase = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm";
+        const coreURL = await toBlobURL(`${unpkgBase}/ffmpeg-core.js`, "text/javascript");
+        const wasmURL = await toBlobURL(`${unpkgBase}/ffmpeg-core.wasm`, "application/wasm");
+        await ffmpeg.load({ coreURL, wasmURL });
+      }
     }
 
     ffmpegInstance = ffmpeg;
     return ffmpeg;
-  })();
+  })().catch((err) => {
+    // Reset singleton so future attempts aren't permanently locked in a rejected state
+    ffmpegLoadingPromise = null;
+    ffmpegInstance = null;
+    throw err;
+  });
 
   return ffmpegLoadingPromise;
 }
@@ -460,7 +487,25 @@ export async function convertVideo(
   const ext = config.outputContainer || "mp4";
   const outputName = `${prefix}${baseName}${suffix}.${ext}`;
 
-  // Primary: Use FFmpeg.wasm (lossless copy or ultrafast transcode)
+  // Priority 1: High-speed zero-copy lossless stream copy if target is MP4 and original parameters are preserved
+  const canDirectRemux =
+    ext === "mp4" &&
+    (config.conversionMode === "remux" ||
+      (config.conversionMode === "auto" &&
+        analysis.canRemuxToMp4 &&
+        config.resolution === "original" &&
+        config.fps === "original" &&
+        config.audioMode !== "strip"));
+
+  if (canDirectRemux) {
+    try {
+      return await losslessRemuxMovToMp4(file, outputName, onProgress, analysis);
+    } catch (directRemuxErr) {
+      console.warn("Direct stream remux failed, attempting FFmpeg:", directRemuxErr);
+    }
+  }
+
+  // Priority 2: Use FFmpeg.wasm (Lossless copy or ultrafast transcode)
   try {
     return await convertVideoWithFFmpeg(
       file,
@@ -471,8 +516,19 @@ export async function convertVideo(
       checkCancelled
     );
   } catch (err) {
-    // Fallback if FFmpeg.wasm fails
-    console.warn("FFmpeg conversion encountered an error, falling back to browser recorder:", err);
+    console.warn("FFmpeg conversion failed:", err);
+
+    // Fallback A: If MP4 was requested, attempt lossless container restamp before canvas
+    if (ext === "mp4") {
+      try {
+        console.info("Falling back to lossless ISO-BMFF remuxer...");
+        return await losslessRemuxMovToMp4(file, outputName, onProgress, analysis);
+      } catch (fbRemuxErr) {
+        console.warn("Lossless remux fallback also failed:", fbRemuxErr);
+      }
+    }
+
+    // Fallback B: HTML5 Canvas MediaRecorder (for browsers that can decode the source format)
     return await transcodeVideoInBrowser(
       file,
       analysis,
@@ -483,3 +539,4 @@ export async function convertVideo(
     );
   }
 }
+
